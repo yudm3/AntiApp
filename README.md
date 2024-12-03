@@ -73,9 +73,6 @@ The app requires a CSV file (`screen_time.csv`) with the following columns:
 
 ## Screenshots
 
-- **Dashboard Overview**  
-  ![Dashboard Overview](./screenshots/dashboard.png)
-
 - **Daily Screen Time Trends**  
   ![Daily Screen Time Trends](./screenshots/daily_screen_time.png)
 
