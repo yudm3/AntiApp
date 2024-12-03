@@ -20,7 +20,7 @@ full_data <- data
 
 ui <- dashboardPage(
   skin = "blue",
-  dashboardHeader(title = "Screen Time Reduction App"),
+  dashboardHeader(title = "Anti App"),
   dashboardSidebar(
     tags$head(
       tags$link(rel = "stylesheet", href = "https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap"),
@@ -54,21 +54,49 @@ ui <- dashboardPage(
         .main-header .logo {
           width: 250px;
         }
+        /* Increase font size for input labels */
+        .shiny-input-container > label {
+          font-size: 16px;
+          font-family: 'Courier Prime', monospace;
+        }
+        /* Increase font size for input values */
+        .selectize-input, .input-daterange input, .shiny-date-range-input input {
+          font-size: 16px;
+          font-family: 'Courier Prime', monospace;
+        }
+        /* Increase font size for date input fields */
+        .date-range input {
+          font-size: 16px !important;
+          font-family: 'Courier Prime', monospace;
+        }
       "))
     ),
     tabItems(
       tabItem(tabName = "about",
-              h2("About the App"),
-              p("This app helps users monitor and reduce their screen time by setting goals and tracking progress.")
+              h2("Welcome to Anti App", style = "font-family: 'Courier Prime';"),
+              p("Anti App is designed to help you monitor and reduce your screen time by setting goals and tracking your progress.", style = "font-family: 'Courier Prime'; font-size: 16px;"),
+              h3("How It Works", style = "font-family: 'Courier Prime';"),
+              tags$ol(
+                tags$li("Navigate to the Home page to view your current screen time statistics.", style = "font-family: 'Courier Prime'; font-size: 16px;"),
+                tags$li("Review your Daily Screen Time and App Usage Breakdown.", style = "font-family: 'Courier Prime'; font-size: 16px;"),
+                tags$li("Check your Top 3 Most Used Apps and consider setting goals for them.", style = "font-family: 'Courier Prime'; font-size: 16px;"),
+                tags$li("Go to the 'Set a Goal' page to create personalized screen time reduction plans.", style = "font-family: 'Courier Prime'; font-size: 16px;"),
+                tags$li("Follow your reduction plan and track your progress over time.", style = "font-family: 'Courier Prime'; font-size: 16px;")
+              ),
+              p("We hope Anti App helps you achieve a healthier balance with your screen time!", style = "font-family: 'Courier Prime'; font-size: 16px;")
       ),
       tabItem(tabName = "home",
-              h2("Home Page"),
+              h2("Anti App - Home Page", style = "font-family: 'Courier Prime';"),
               fluidRow(
                 box(width = 12,
                     column(6, selectInput("user", "Select User:", choices = unique(full_data$UserID))),
                     column(6, dateRangeInput("dateRange", "Select Date Range:",
                                              start = min(full_data$Date),
-                                             end = max(full_data$Date)))
+                                             end = max(full_data$Date),
+                                             width = '100%',
+                                             # Use tags to increase font size
+                                             label = tags$span("Select Date Range:", style = "font-size:16px; font-family: 'Courier Prime';"),
+                                             startview = "month"))
                 )
               ),
               fluidRow(
@@ -85,17 +113,21 @@ ui <- dashboardPage(
               )
       ),
       tabItem(tabName = "set_goal",
-              h2("Set a Goal"),
+              h2("Anti App - Set a Goal", style = "font-family: 'Courier Prime';"),
               uiOutput("goalSettingUI")
       ),
       tabItem(tabName = "results",
-              h2("Results", style = "font-family: 'Courier Prime';"),
+              h2("Anti App - Results", style = "font-family: 'Courier Prime';"),
               uiOutput("reductionMessage"),
               uiOutput("reductionPlanTabs")
       ),
       tabItem(tabName = "references",
-              h2("References"),
-              p("List of references or additional information.")
+              h2("References", style = "font-family: 'Courier Prime';"),
+              p("This project is open-source and available on GitHub:", style = "font-family: 'Courier Prime'; font-size: 16px;"),
+              tags$a(href = "https://github.com/yudm3/AntiApp", "GitHub Repository", target = "_blank", style = "font-family: 'Courier Prime'; font-size: 16px;"),
+              h3("Contact Information", style = "font-family: 'Courier Prime';"),
+              p("Name: YUGAY DMITRIY", style = "font-family: 'Courier Prime'; font-size: 16px;"),
+              p("Email: ", tags$a(href = "mailto:yudm3hw@gmail.com", "yudm3hw@gmail.com", style = "font-family: 'Courier Prime'; font-size: 16px;"))
       )
     )
   )
@@ -197,7 +229,7 @@ server <- function(input, output, session) {
     app_list <- lapply(1:nrow(top_apps), function(i) {
       app <- top_apps$AppName[i]
       hours <- top_apps$TotalHours[i]
-      tags$li(tags$span(style = "font-family: 'Courier Prime';", paste0(app, ": ", hours, " hours")))
+      tags$li(tags$span(style = "font-family: 'Courier Prime'; font-size: 18px;", paste0(app, ": ", hours, " hours")))
     })
     
     action_button <- actionButton("goToSetGoal", "Set a Goal", icon = icon("bullseye"), 
@@ -305,10 +337,16 @@ server <- function(input, output, session) {
       req(reduction_plan)
       apps <- unique(reduction_plan$AppName)
       tabpanels <- lapply(apps, function(app) {
+        # Define app_id within the lapply function
+        app_id <- gsub("[^[:alnum:]_]", "_", app)
         tabPanel(
           title = app,
-          dataTableOutput(outputId = paste0("reductionPlanTable_", gsub("[^[:alnum:]_]", "_", app))),
-          plotOutput(outputId = paste0("reductionPlanPlot_", gsub("[^[:alnum:]_]", "_", app)), height = 400)
+          tags$div(
+            style = "margin-top: 20px;",
+            dataTableOutput(outputId = paste0("reductionPlanTable_", app_id))
+          ),
+          tags$br(),
+          plotOutput(outputId = paste0("reductionPlanPlot_", app_id), height = 400)
         )
       })
       do.call(tabsetPanel, c(list(id = "appTabs"), tabpanels))
@@ -329,7 +367,7 @@ server <- function(input, output, session) {
           })
           
           output[[paste0("reductionPlanPlot_", app_id)]] <- renderPlot({
-            ggplot(app_data, aes(x = Date, y = TargetMinutes)) +
+            ggplot(app_data, aes(x = factor(Date), y = TargetMinutes)) +
               geom_bar(stat = "identity", fill = "steelblue") +
               geom_text(aes(label = paste0(floor(TargetMinutes / 60), "h ", round(TargetMinutes %% 60), "m")), vjust = -0.5) +
               labs(title = paste("Reduction Plan for", app_name), x = "Date", y = "Usage Time (Minutes)") +
@@ -337,7 +375,8 @@ server <- function(input, output, session) {
               theme(
                 plot.title = element_text(size = 20, face = "bold", family = "Courier Prime"),
                 axis.title = element_text(size = 16, family = "Courier Prime"),
-                axis.text = element_text(size = 14, family = "Courier Prime")
+                axis.text = element_text(size = 14, family = "Courier Prime"),
+                axis.text.x = element_text(angle = 45, hjust = 1)
               )
           })
         })
