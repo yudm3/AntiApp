@@ -100,7 +100,7 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 ## Contact
 
 For queries or suggestions, please reach out to:
-- [YUGAY DMITRIY]
-- Email: [yudm3off@gmail.com]
-- GitHub: [https://github.com/yudm3/AntiApp]
+- YUGAY DMITRIY
+- Email: yudm3off@gmail.com
+- GitHub: https://github.com/yudm3/AntiApp
 
